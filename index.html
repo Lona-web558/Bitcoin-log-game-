@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SATOSHI TRIG — Bitcoin Math Quiz &amp; Wallet</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E11;
+    --surface:#131820;
+    --surface-2:#1B2129;
+    --border:#262E38;
+    --orange:#F7931A;
+    --orange-dim:#8a5613;
+    --green:#21C15E;
+    --red:#F0455C;
+    --text:#E8EAED;
+    --muted:#7C8595;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(247,147,26,0.07), transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(33,193,94,0.05), transparent 50%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3,h4,.display-font{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .app-shell{max-width:520px;margin:0 auto;padding:20px 16px 60px;}
+
+  .ticker-wrap{
+    overflow:hidden; white-space:nowrap; border-bottom:1px solid var(--border);
+    background:var(--surface); padding:8px 0; margin-bottom:24px;
+  }
+  .ticker-track{display:inline-block; padding-left:100%; animation:ticker 18s linear infinite;}
+  .ticker-track span{margin-right:36px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--muted);}
+  .ticker-track span b{color:var(--orange);}
+  @keyframes ticker{ 0%{transform:translateX(0);} 100%{transform:translateX(-100%);} }
+
+  .brand-row{display:flex; align-items:center; gap:10px; margin-bottom:28px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:9px;
+    background:linear-gradient(135deg,var(--orange),#c9761a);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700; font-family:'Space Grotesk',sans-serif; color:#0B0E11; font-size:1.1rem;
+  }
+  .brand-title{font-size:1.15rem; font-weight:700; letter-spacing:0.02em;}
+  .brand-sub{font-size:0.72rem; color:var(--muted); letter-spacing:0.12em; text-transform:uppercase;}
+
+  .card-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:18px;
+  }
+  .nav-pills-custom{display:flex; gap:8px; margin-bottom:20px;}
+  .nav-pills-custom button{
+    flex:1; background:transparent; border:1px solid var(--border); color:var(--muted);
+    border-radius:10px; padding:9px; font-weight:600; font-size:0.85rem; transition:all .15s;
+  }
+  .nav-pills-custom button.active{background:var(--orange); color:#0B0E11; border-color:var(--orange);}
+
+  .form-control, .form-select{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    border-radius:9px; padding:10px 12px; font-size:0.9rem;
+  }
+  .form-control:focus, .form-select:focus{
+    background:var(--surface-2); color:var(--text); border-color:var(--orange);
+    box-shadow:0 0 0 3px rgba(247,147,26,0.15);
+  }
+  .form-label{font-size:0.78rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;}
+  .btn-orange{
+    background:var(--orange); color:#0B0E11; font-weight:700; border:none; border-radius:9px; padding:11px;
+  }
+  .btn-orange:hover{background:#e08512; color:#0B0E11;}
+  .btn-orange:disabled{opacity:0.6;}
+  .btn-outline-custom{
+    background:transparent; border:1px solid var(--border); color:var(--text); border-radius:9px; padding:11px; font-weight:600;
+  }
+  .btn-outline-custom:hover{border-color:var(--orange); color:var(--orange);}
+
+  .wallet-card{
+    position:relative; border-radius:16px; padding:22px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(247,147,26,0.25), transparent 60%),
+      linear-gradient(155deg, #171c24, #0d1116 70%);
+    border:1px solid #2b2318;
+    overflow:hidden;
+    box-shadow:0 0 0 1px rgba(247,147,26,0.08), 0 20px 40px -20px rgba(0,0,0,0.6);
+  }
+  .wallet-card::before{
+    content:"₿"; position:absolute; right:-10px; top:-30px; font-size:9rem; color:rgba(247,147,26,0.06);
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .wallet-label{font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.14em;}
+  .wallet-balance{font-family:'JetBrains Mono',monospace; font-size:2.1rem; font-weight:700; color:var(--orange); margin:4px 0 2px;}
+  .wallet-address{font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--muted); word-break:break-all;}
+
+  .stat-chip{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+    padding:10px 12px; text-align:center;
+  }
+  .stat-chip .val{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:1rem;}
+  .stat-chip .lbl{font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;}
+
+  .equation-box{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px;
+    padding:28px 16px; text-align:center; margin-bottom:18px;
+  }
+  .equation-text{font-family:'JetBrains Mono',monospace; font-size:1.7rem; color:var(--orange); letter-spacing:0.02em;}
+  .option-btn{
+    width:100%; text-align:left; background:var(--surface-2); border:1px solid var(--border);
+    color:var(--text); border-radius:10px; padding:12px 14px; margin-bottom:10px; font-family:'JetBrains Mono',monospace;
+    font-size:0.95rem; transition:all .12s;
+  }
+  .option-btn:hover{border-color:var(--orange);}
+  .option-btn.correct{background:rgba(33,193,94,0.15); border-color:var(--green); color:var(--green);}
+  .option-btn.wrong{background:rgba(240,69,92,0.15); border-color:var(--red); color:var(--red);}
+  .option-btn:disabled{opacity:0.6;}
+
+  .txn-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:0.85rem;}
+  .txn-row:last-child{border-bottom:none;}
+  .txn-amt-pos{color:var(--green); font-family:'JetBrains Mono',monospace; font-weight:600;}
+  .txn-amt-neg{color:var(--red); font-family:'JetBrains Mono',monospace; font-weight:600;}
+
+  .section-title{font-size:0.95rem; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+  .section-title::before{content:""; width:4px; height:16px; background:var(--orange); border-radius:2px; display:inline-block;}
+  .alert-custom{border-radius:10px; font-size:0.85rem; padding:10px 14px;}
+  .hidden{display:none !important;}
+  .link-muted{color:var(--muted); text-decoration:none; font-size:0.85rem;}
+  .link-muted:hover{color:var(--orange);}
+  .logout-link{color:var(--muted); font-size:0.8rem; cursor:pointer;}
+  .logout-link:hover{color:var(--red);}
+  .spinner-inline{display:inline-block; width:14px; height:14px; border:2px solid rgba(11,14,17,0.3); border-top-color:#0B0E11; border-radius:50%; animation:spin 0.7s linear infinite; margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span>BTC/USD <b>$64,218.40</b></span>
+    <span>sin · cos · tan · log</span>
+    <span>XAU/USD <b>$2,412.10</b></span>
+    <span>SOLVE → EARN → WITHDRAW</span>
+    <span>BTC/USD <b>$64,218.40</b></span>
+    <span>sin · cos · tan · log</span>
+    <span>XAU/USD <b>$2,412.10</b></span>
+    <span>SOLVE → EARN → WITHDRAW</span>
+  </div>
+</div>
+
+<div class="app-shell">
+
+  <div class="brand-row">
+    <div class="brand-mark">₿</div>
+    <div>
+      <div class="brand-title">SATOSHI TRIG</div>
+      <div class="brand-sub">Bitcoin Math Quiz &amp; Wallet</div>
+    </div>
+  </div>
+
+  <!-- AUTH VIEW -->
+  <div id="authView">
+    <div class="card-panel">
+      <div class="nav-pills-custom">
+        <button id="tabLoginBtn" class="active" onclick="switchAuthTab('login')">Log In</button>
+        <button id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <div id="authAlert"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="loginUsername" placeholder="e.g. lona_smith" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-orange w-100 mt-2" id="loginSubmitBtn">Log In</button>
+      </form>
+
+      <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="regUsername" placeholder="Choose a username" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="regPassword" placeholder="Min. 6 characters" required minlength="6">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" class="form-control" id="regPasswordConfirm" placeholder="Repeat password" required>
+        </div>
+        <button type="submit" class="btn btn-orange w-100 mt-2" id="regSubmitBtn">Create Account</button>
+      </form>
+    </div>
+    <p class="text-center link-muted mb-0">Your account, balance, and quiz stats are saved on the server.</p>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboardView" class="hidden">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);">Welcome back</div>
+        <div style="font-weight:700;" id="welcomeUsername">—</div>
+      </div>
+      <span class="logout-link" onclick="handleLogout()">Log out ⏻</span>
+    </div>
+
+    <div class="wallet-card mb-3">
+      <div class="wallet-label">Total Balance</div>
+      <div class="wallet-balance"><span id="walletBalance">0.00000000</span> BTC</div>
+      <div class="wallet-address mb-3" id="walletAddress">bc1q—</div>
+      <div class="row g-2">
+        <div class="col-4"><div class="stat-chip"><div class="val" id="statCorrect">0</div><div class="lbl">Correct</div></div></div>
+        <div class="col-4"><div class="stat-chip"><div class="val" id="statStreak">0</div><div class="lbl">Streak</div></div></div>
+        <div class="col-4"><div class="stat-chip"><div class="val" id="statAnswered">0</div><div class="lbl">Answered</div></div></div>
+      </div>
+    </div>
+
+    <div class="card-panel">
+      <div class="section-title">Math Quiz</div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="streak-badge" id="quizTypeBadge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(247,147,26,0.12);border:1px solid var(--orange-dim);color:var(--orange);border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">sin</span>
+        <span class="link-muted" style="font-size:0.75rem;">+0.00015 BTC / correct</span>
+      </div>
+      <div class="equation-box">
+        <div class="equation-text" id="equationText">Loading…</div>
+      </div>
+      <div id="optionsWrap"></div>
+      <div id="quizFeedback" class="mt-2"></div>
+      <button class="btn btn-outline-custom w-100 mt-2" onclick="loadQuestion()">Skip / Next Question</button>
+    </div>
+
+    <div class="card-panel">
+      <div class="section-title">Withdraw Funds</div>
+      <div id="withdrawAlert"></div>
+      <form onsubmit="handleWithdraw(event)">
+        <div class="mb-3">
+          <label class="form-label">Amount (BTC)</label>
+          <input type="number" step="0.00000001" min="0.00000001" class="form-control mono" id="withdrawAmount" placeholder="0.00050000" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Destination Wallet Address</label>
+          <input type="text" class="form-control mono" id="withdrawAddress" placeholder="bc1q..., 1..., or 3..." required>
+        </div>
+        <button type="submit" class="btn btn-orange w-100" id="withdrawSubmitBtn">Request Withdrawal</button>
+      </form>
+    </div>
+
+    <div class="card-panel">
+      <div class="section-title">Transaction History</div>
+      <div id="txnList">
+        <p class="link-muted mb-0">No transactions yet.</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ---------- API base ----------
+// Same-origin, since server.js serves this file directly.
+const API_BASE = '/api';
+let authToken = localStorage.getItem('satoshiTrigToken') || null;
+let currentUsername = localStorage.getItem('satoshiTrigUsername') || null;
+let currentAnswerOption = null;
+
+async function apiCall(path, method = 'GET', body = null, auth = true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth && authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Request failed');
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+// ---------- Auth tab switching ----------
+function switchAuthTab(tab){
+  document.getElementById('tabLoginBtn').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegisterBtn').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  document.getElementById('authAlert').innerHTML = '';
+}
+
+function showAlert(elId, message, type){
+  document.getElementById(elId).innerHTML =
+    `<div class="alert-custom" style="background:${type==='danger'?'rgba(240,69,92,0.12)':'rgba(33,193,94,0.12)'}; color:${type==='danger'?'var(--red)':'var(--green)'}; border:1px solid ${type==='danger'?'var(--red)':'var(--green)'};">${message}</div>`;
+}
+
+// ---------- Register ----------
+async function handleRegister(e){
+  e.preventDefault();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regPasswordConfirm').value;
+  const btn = document.getElementById('regSubmitBtn');
+
+  if(password !== confirm){
+    showAlert('authAlert', 'Passwords do not match.', 'danger');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-inline"></span>Creating account…';
+  try {
+    await apiCall('/auth/register', 'POST', { username, password }, false);
+    showAlert('authAlert', 'Account created! You can log in now.', 'success');
+    document.getElementById('registerForm').reset();
+    setTimeout(()=>switchAuthTab('login'), 900);
+  } catch(err){
+    showAlert('authAlert', err.message, 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+}
+
+// ---------- Login ----------
+async function handleLogin(e){
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginSubmitBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-inline"></span>Logging in…';
+  try {
+    const data = await apiCall('/auth/login', 'POST', { username, password }, false);
+    authToken = data.token;
+    currentUsername = data.username;
+    localStorage.setItem('satoshiTrigToken', authToken);
+    localStorage.setItem('satoshiTrigUsername', currentUsername);
+    enterDashboard();
+  } catch(err){
+    showAlert('authAlert', err.message, 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Log In';
+  }
+}
+
+function handleLogout(){
+  authToken = null;
+  currentUsername = null;
+  localStorage.removeItem('satoshiTrigToken');
+  localStorage.removeItem('satoshiTrigUsername');
+  document.getElementById('dashboardView').classList.add('hidden');
+  document.getElementById('authView').classList.remove('hidden');
+  document.getElementById('loginForm').reset();
+}
+
+function enterDashboard(){
+  document.getElementById('authView').classList.add('hidden');
+  document.getElementById('dashboardView').classList.remove('hidden');
+  document.getElementById('welcomeUsername').textContent = currentUsername;
+  refreshWallet();
+  loadQuestion();
+}
+
+// ---------- Wallet ----------
+async function refreshWallet(){
+  try {
+    const data = await apiCall('/wallet');
+    document.getElementById('walletBalance').textContent = data.balance.toFixed(8);
+    document.getElementById('walletAddress').textContent = data.address;
+    document.getElementById('statCorrect').textContent = data.correct;
+    document.getElementById('statStreak').textContent = data.streak;
+    document.getElementById('statAnswered').textContent = data.answered;
+    renderTxns(data.transactions);
+  } catch(err){
+    if(err.status === 401 || err.status === 403){ handleLogout(); }
+  }
+}
+
+function renderTxns(txns){
+  const wrap = document.getElementById('txnList');
+  if(!txns || txns.length === 0){
+    wrap.innerHTML = '<p class="link-muted mb-0">No transactions yet — answer quiz questions to earn BTC.</p>';
+    return;
+  }
+  wrap.innerHTML = txns.slice(0,12).map(t => {
+    const isNeg = t.amount < 0;
+    const timeStr = new Date(t.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    return `<div class="txn-row">
+      <div>
+        <div>${t.type}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">${timeStr}</div>
+      </div>
+      <div class="${isNeg ? 'txn-amt-neg':'txn-amt-pos'}">${isNeg?'':'+'}${t.amount.toFixed(8)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- Quiz ----------
+async function loadQuestion(){
+  document.getElementById('quizFeedback').innerHTML = '';
+  document.getElementById('equationText').textContent = 'Loading…';
+  document.getElementById('optionsWrap').innerHTML = '';
+  try {
+    const q = await apiCall('/quiz/question');
+    document.getElementById('quizTypeBadge').textContent = q.type;
+    document.getElementById('equationText').textContent = q.questionText;
+    const wrap = document.getElementById('optionsWrap');
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.onclick = () => submitAnswer(opt, btn);
+      wrap.appendChild(btn);
+    });
+  } catch(err){
+    if(err.status === 401 || err.status === 403){ handleLogout(); return; }
+    document.getElementById('equationText').textContent = 'Could not load question.';
+  }
+}
+
+async function submitAnswer(selected, btnEl){
+  const allBtns = document.querySelectorAll('#optionsWrap .option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  try {
+    const result = await apiCall('/quiz/answer', 'POST', { selected });
+
+    if(result.correct){
+      btnEl.classList.add('correct');
+      document.getElementById('quizFeedback').innerHTML =
+        `<div class="alert-custom" style="background:rgba(33,193,94,0.12); color:var(--green); border:1px solid var(--green);">Correct! +${result.reward.toFixed(8)} BTC · Streak ${result.streak} 🔥</div>`;
+    } else {
+      btnEl.classList.add('wrong');
+      allBtns.forEach(b => { if(b.textContent == result.correctVal) b.classList.add('correct'); });
+      document.getElementById('quizFeedback').innerHTML =
+        `<div class="alert-custom" style="background:rgba(240,69,92,0.12); color:var(--red); border:1px solid var(--red);">Not quite. Correct answer: ${result.correctVal}</div>`;
+    }
+
+    document.getElementById('walletBalance').textContent = result.balance.toFixed(8);
+    document.getElementById('statStreak').textContent = result.streak;
+    document.getElementById('statCorrect').textContent = result.correctCount;
+    document.getElementById('statAnswered').textContent = result.answered;
+    refreshWallet();
+    setTimeout(loadQuestion, 1400);
+  } catch(err){
+    if(err.status === 401 || err.status === 403){ handleLogout(); return; }
+    document.getElementById('quizFeedback').innerHTML =
+      `<div class="alert-custom" style="background:rgba(240,69,92,0.12); color:var(--red); border:1px solid var(--red);">${err.message}</div>`;
+  }
+}
+
+// ---------- Withdrawal ----------
+async function handleWithdraw(e){
+  e.preventDefault();
+  const amount = parseFloat(document.getElementById('withdrawAmount').value);
+  const address = document.getElementById('withdrawAddress').value.trim();
+  const btn = document.getElementById('withdrawSubmitBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-inline"></span>Processing…';
+  try {
+    const result = await apiCall('/wallet/withdraw', 'POST', { amount, address });
+    showAlert('withdrawAlert', result.message, 'success');
+    document.getElementById('withdrawAmount').value = '';
+    document.getElementById('withdrawAddress').value = '';
+    refreshWallet();
+  } catch(err){
+    showAlert('withdrawAlert', err.message, 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Request Withdrawal';
+  }
+}
+
+// ---------- Boot ----------
+if(authToken && currentUsername){
+  enterDashboard();
+}
+</script>
+
+</body>
+</html>
